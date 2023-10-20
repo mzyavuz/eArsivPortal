@@ -1,16 +1,19 @@
 # Bu araç @keyiflerolsun tarafından | @KekikAkademi için yazılmıştır.
+import os, smtplib, pdfkit
 
-from ..Libs      import legacy_session, Komut, Komutlar, fatura_ver
-from requests    import Response
-from json        import dumps
-from uuid        import uuid4
-from parsel      import Selector
-from .Hatalar    import GirisYapilmadi, OturumSuresiDoldu, eArsivPortalHatasi
+from email.message import EmailMessage
+from ..Libs        import legacy_session, Komut, Komutlar, fatura_ver
+from requests      import Response
+from json          import dumps
+from uuid          import uuid4
+from parsel        import Selector
+from .Hatalar      import GirisYapilmadi, OturumSuresiDoldu, eArsivPortalHatasi
 
 from datetime    import datetime
 from pytz        import timezone
 
 from pydantic.v1 import create_model, BaseModel
+
 
 class eArsivPortal:
     def __init__(self, kullanici_kodu:str="33333315", sifre:str="1", test_modu:bool=True):
@@ -277,3 +280,58 @@ class eArsivPortal:
         return self.__nesne_ver("GibSMSOnay", {"mesaj": veri.get("msg")})
 
     # TODO: https://github.com/mlevent/fatura 'dan faydalanarak geri kalan fonksiyonlar yazılacaktır..
+
+class eArsivPortalUtils(eArsivPortal):
+    def __init__(self, kullanici_kodu: str = "33333315", sifre: str = "1", test_modu: bool = True):
+        super().__init__(kullanici_kodu, sifre, test_modu)
+
+    def convert_pdf(fatura:dict, input_html:str, output_pdf:str, del_html:bool=True, html_dir:str="", pdf_dir:str="") -> bool:
+        # You should first dowload html file of the fatura that you want to convert pdf (fatura_html)
+
+        # Configure the options for wkhtmltopdf (you can customize this)
+        options = {
+            'page-size': 'A4',
+            'margin-top': '15mm',
+            'margin-right': '0mm',
+            'margin-bottom': '0mm',
+            'margin-left': '15mm',
+        }
+
+        html_path = f"{html_dir}/{input_html}" if html_dir else input_html
+        pdf_path = f"{pdf_dir}/{output_pdf}" if pdf_dir else output_pdf
+
+        try:
+        # Convert HTML to PDF
+            pdfkit.from_file(html_path, pdf_path, options=options)
+            print(f'Success: PDF saved as {output_pdf} at {pdf_dir}')
+        except Exception as e:
+            print(f'Error: {e}')
+
+        if del_html:
+            try:
+                os.remove(html_path)
+                print(f"File '{html_path}' has been deleted.")
+            except FileNotFoundError:
+                print(f"File '{html_path}' not found.")
+            except Exception as e:
+                print(f"An error occurred: {e}")
+
+    def send_mail(pdf_path:str):
+
+        msg = EmailMessage()
+        msg['Subject'] = 'Fatura'
+        msg['From'] = 'your_email@gmail.com'
+        msg['To'] = 'recipient@example.com'
+        msg.set_content('Hello, this is the email body.')
+
+        with open(f'{pdf_path}', 'rb') as pdf_file:
+            msg.add_attachment(pdf_file.read(), maintype='application', subtype='pdf', filename='your.pdf')
+
+        # If you use gmail than you should take a password for using in applications. 
+        # 'your_password' is not your actual password for your gmail but 16 characters password for apps.
+        # Further information please check out 'https://myaccount.google.com/apppasswords'
+        with smtplib.SMTP('smtp.gmail.com', 587) as server:
+            server.starttls()
+            server.login('your_email@gmail.com', 'your_password')
+            server.send_message(msg)
+    
