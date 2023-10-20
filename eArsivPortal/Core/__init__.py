@@ -316,12 +316,12 @@ class eArsivPortalUtils(eArsivPortal):
             except Exception as e:
                 print(f"An error occurred: {e}")
 
-    def send_mail(pdf_name:str, pdf_dir:str, recipient_mail:str, subject:str="Fatura", content:str="Fatura of client_name"):
+    def send_mail(pdf_name:str, pdf_dir:str, recipient_mail:str, subject:str="Fatura", content:str=""):
         # Please change the mail adress 'your_email@gmail.com' to your mail.
         msg = EmailMessage()
         msg['Subject'] = subject
         msg['From'] = 'your_email@gmail.com'
-        msg['To'] = 'recipient@example.com'
+        msg['To'] = recipient_mail
         msg.set_content(content)
 
         pdf_path = f"{pdf_dir}/{pdf_name}" if pdf_dir else pdf_name
