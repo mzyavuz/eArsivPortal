@@ -285,7 +285,7 @@ class eArsivPortalUtils(eArsivPortal):
     def __init__(self, kullanici_kodu: str = "33333315", sifre: str = "1", test_modu: bool = True):
         super().__init__(kullanici_kodu, sifre, test_modu)
 
-    def convert_pdf(fatura:dict, input_html:str, output_pdf:str, del_html:bool=True, html_dir:str="", pdf_dir:str="") -> bool:
+    def convert_pdf(fatura:dict, input_html:str, output_pdf:str, html_dir:str, pdf_dir:str, del_html:bool=True,) -> bool:
         # You should first dowload html file of the fatura that you want to convert pdf (fatura_html)
 
         # Configure the options for wkhtmltopdf (you can customize this)
@@ -316,16 +316,18 @@ class eArsivPortalUtils(eArsivPortal):
             except Exception as e:
                 print(f"An error occurred: {e}")
 
-    def send_mail(pdf_path:str):
-
+    def send_mail(pdf_name:str, pdf_dir:str, recipient_mail:str, subject:str="Fatura", content:str="Fatura of client_name"):
+        # Please change the mail adress 'your_email@gmail.com' to your mail.
         msg = EmailMessage()
-        msg['Subject'] = 'Fatura'
+        msg['Subject'] = subject
         msg['From'] = 'your_email@gmail.com'
         msg['To'] = 'recipient@example.com'
-        msg.set_content('Hello, this is the email body.')
+        msg.set_content(content)
+
+        pdf_path = f"{pdf_dir}/{pdf_name}" if pdf_dir else pdf_name
 
         with open(f'{pdf_path}', 'rb') as pdf_file:
-            msg.add_attachment(pdf_file.read(), maintype='application', subtype='pdf', filename='your.pdf')
+            msg.add_attachment(pdf_file.read(), maintype='application', subtype='pdf', filename=f'{pdf_name}')
 
         # If you use gmail than you should take a password for using in applications. 
         # 'your_password' is not your actual password for your gmail but 16 characters password for apps.
