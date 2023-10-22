@@ -136,16 +136,16 @@ class eArsivPortal:
 
     def fatura_olustur(
         self,
-        tarih:str         = "07/10/1995",
-        saat:str          = "14:28:37",
+        tarih:str         = "",
+        saat:str          = "",
         vkn_veya_tckn:str = "11111111111",
-        ad:str            = "Ömer Faruk",
-        soyad:str         = "Sancak",
+        ad:str            = "",
+        soyad:str         = "",
         unvan:str         = "",
         vergi_dairesi:str = "",
-        urun_adi:str      = "Python Yazılım Hizmeti",
-        fiyat:int | float = 100,
-        fatura_notu:str   = "— QNB Finansbank —\nTR70 0011 1000 0000 0118 5102 59\nÖmer Faruk Sancak"
+        urun_adi:str      = "",
+        fiyat:int | float = 0,
+        fatura_notu:str   = ""
     ) -> BaseModel:
         kisi_bilgi = self.kisi_getir(vkn_veya_tckn)
 
@@ -285,7 +285,7 @@ class eArsivPortalUtils(eArsivPortal):
     def __init__(self, kullanici_kodu: str = "33333315", sifre: str = "1", test_modu: bool = True):
         super().__init__(kullanici_kodu, sifre, test_modu)
 
-    def convert_pdf(fatura:dict, input_html:str, output_pdf:str, html_dir:str, pdf_dir:str, del_html:bool=True,) -> bool:
+    def convert_pdf(self, input_html:str, output_pdf:str, html_dir:str, pdf_dir:str, del_html:bool=True,) -> bool:
         # You should first dowload html file of the fatura that you want to convert pdf (fatura_html)
 
         # Configure the options for wkhtmltopdf (you can customize this)
@@ -316,7 +316,7 @@ class eArsivPortalUtils(eArsivPortal):
             except Exception as e:
                 print(f"An error occurred: {e}")
 
-    def send_mail(pdf_name:str, pdf_dir:str, recipient_mail:str, subject:str="Fatura", content:str=""):
+    def send_mail(self, pdf_name:str, pdf_dir:str, recipient_mail:str, subject:str="Fatura", content:str=""):
         # Please change the mail adress 'your_email@gmail.com' to your mail.
         msg = EmailMessage()
         msg['Subject'] = subject
